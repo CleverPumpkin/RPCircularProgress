@@ -175,7 +175,10 @@ open class RPCircularProgress: UIView {
         super.didMoveToWindow()
 
         if let window = window {
-			isHidden = hidesWhenStopped
+			if hidesWhenStopped {
+				isHidden = progressLayer.animation(forKey: AnimationKeys.indeterminate) == nil
+			}
+			
             progressLayer.contentsScale = window.screen.scale
             progressLayer.setNeedsDisplay()
         }
