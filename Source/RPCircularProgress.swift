@@ -128,6 +128,17 @@ open class RPCircularProgress: UIView {
       Controls the speed at which the indeterminate progress bar animates
      */
     @IBInspectable open var indeterminateDuration: CFTimeInterval = Defaults.indeterminateDuration
+	
+	/// A Boolean value that controls whether the receiver is hidden when the animation is stopped.
+	/// - Warning: Should be enabled only when indeterminate (spinning) progress used.
+	@IBInspectable open var hidesWhenStopped: Bool {
+		get {
+			return progressLayer.hidesWhenStopped
+		}
+		set {
+			progressLayer.hidesWhenStopped = newValue
+		}
+	}
 
     // MARK: - Custom Base Layer
 
@@ -164,6 +175,10 @@ open class RPCircularProgress: UIView {
         super.didMoveToWindow()
 
         if let window = window {
+			if hidesWhenStopped {
+				isHidden = progressLayer.animation(forKey: AnimationKeys.indeterminate) == nil
+			}
+			
             progressLayer.contentsScale = window.screen.scale
             progressLayer.setNeedsDisplay()
         }
@@ -189,6 +204,10 @@ open class RPCircularProgress: UIView {
             completion?()
         }
 
+		if hidesWhenStopped {
+			isHidden = !enabled
+		}
+		
         guard enabled else { return }
 
         addIndeterminateAnimation(completion)
@@ -256,6 +275,7 @@ private extension RPCircularProgress {
         progressLayer.clockwiseProgress = Defaults.clockwiseProgress
         indeterminateDuration = Defaults.indeterminateDuration
         progressLayer.indeterminateProgress = Defaults.indeterminateProgress
+		progressLayer.hidesWhenStopped = Defaults.hidesWhenStopped
     }
 
     // MARK: - Progress
@@ -317,6 +337,7 @@ private extension RPCircularProgress {
         @NSManaged var progressTintColor: UIColor
         @NSManaged var innerTintColor: UIColor?
 
+		@NSManaged var hidesWhenStopped: Bool
         @NSManaged var roundedCorners: Bool
         @NSManaged var clockwiseProgress: Bool
         @NSManaged var thicknessRatio: CGFloat
@@ -420,6 +441,7 @@ private extension RPCircularProgress {
         static let progressTintColor = UIColor.white
         static let backgroundColor = UIColor.clear
 
+		static let hidesWhenStopped = false
         static let progress: CGFloat = 0
         static let thicknessRatio: CGFloat = 0.3
         static let roundedCorners = true
